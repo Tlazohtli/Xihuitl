@@ -3,12 +3,11 @@ import * as dotenv from 'dotenv';
 import { DateTime } from 'luxon';
 import { awsService } from './services/aws.service';
 import { Command } from './types';
-import { timeCommand } from './commands/time';
+import { timeCommand, handleTimeMentions } from './commands/time';
 
 dotenv.config();
 
 const TOKEN = process.env.DISCORD_TOKEN!;
-const COOLDOWN_MS = 2 * 60 * 60 * 1000;
 
 const client = new Client({
     intents: [
@@ -45,27 +44,7 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-const lastReplyTimes = new Map<string, number>();
-
-client.on('messageCreate', async message => {
-    if (message.author.bot) return;
-    if (message.mentions.users.size === 0) return;
-
-    const now = Date.now();
-    for (const [userId, user] of message.mentions.users) {
-        if (user.bot) continue;
-
-        const lastSeen = lastReplyTimes.get(userId);
-        if (lastSeen && (now - lastSeen) < COOLDOWN_MS) continue;
-
-        const data = await awsService.getSingleUser(userId);
-        if (data) {
-            const time = DateTime.now().setZone(data.timezone);
-            await message.channel.send(`🕒 It is **${time.toFormat("hh:mm a")}** for <@${userId}>.`);
-            lastReplyTimes.set(userId, now);
-        }
-    }
-});
+client.on('messageCreate', handleTimeMentions);
 
 client.once('clientReady', () => {
     console.log(`Logged in as ${client.user?.tag}`);

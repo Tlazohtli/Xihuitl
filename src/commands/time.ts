@@ -1,8 +1,11 @@
-import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message } from 'discord.js';
 import { DateTime } from 'luxon';
 import { awsService } from '../services/aws.service';
 import { getTimezoneFromCity } from '../services/geo.service';
 import { Command } from '../types';
+
+const COOLDOWN_MS = 2 * 60 * 60 * 1000;
+const lastReplyTimes = new Map<string, number>();
 
 export const timeCommand: Command = {
     data: new SlashCommandBuilder()
@@ -114,6 +117,27 @@ export const timeCommand: Command = {
                 .setDescription(chunk.join("\n"));
 
             await interaction.editReply({ embeds: [embed] });
+        }
+    }
+};
+
+export const handleTimeMentions = async (message: Message) => {
+    if (!message.inGuild()) return;
+    if (message.author.bot) return;
+    if (message.mentions.users.size === 0) return;
+
+    const now = Date.now();
+    for (const [userId, user] of message.mentions.users) {
+        if (user.bot) continue;
+
+        const lastSeen = lastReplyTimes.get(userId);
+        if (lastSeen && (now - lastSeen) < COOLDOWN_MS) continue;
+
+        const data = await awsService.getSingleUser(userId);
+        if (data) {
+            const time = DateTime.now().setZone(data.timezone);
+            await message.channel.send(`🕒 It is **${time.toFormat("hh:mm a")}** for <@${userId}>.`);
+            lastReplyTimes.set(userId, now);
         }
     }
 };

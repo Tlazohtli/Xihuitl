@@ -18,10 +18,10 @@ REMOTE_DIR=/home/ec2-user/xiuh-bot
 ```
 
 ## Deploying
-1. **First-time setup:** `chmod +x bootstrap.sh && ./bootstrap.sh`  
+1. **First-time setup:** `make bootstrap`  
    Installs Node.js on the EC2 host (if missing), creates the remote working directory, and provisions the `discordbot` systemd service.
-2. **Regular deploys:** `chmod +x deploy.sh && ./deploy.sh`  
-   Builds the TypeScript project, bundles artifacts, uploads them via `make deploy`, installs production dependencies, and restarts the systemd service.
-3. **Slash commands:** After changing `/time`, run `npm run deploy-commands` locally to refresh Discord slash commands.
+2. **Regular deploys:** `make deploy`  
+   Builds the TypeScript project, bundles artifacts, uploads them to EC2, installs production dependencies, and restarts the systemd service.
+3. **Slash commands:** After changing `/time`, run `make deploy.commands` locally to refresh Discord slash commands.
 
 Monitor the bot with `ssh -i $SSH_KEY $EC2_USER@$EC2_HOST` and `journalctl -u discordbot -f`.

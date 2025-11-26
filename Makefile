@@ -35,8 +35,8 @@ deploy: package
 	ssh -i $(SSH_KEY) -o StrictHostKeyChecking=no $(EC2_USER)@$(EC2_HOST) "mkdir -p $(REMOTE_DIR)"
 	scp -i $(SSH_KEY) bot-deploy.tar.gz $(EC2_USER)@$(EC2_HOST):$(REMOTE_DIR)
 	ssh -i $(SSH_KEY) $(EC2_USER)@$(EC2_HOST) "cd $(REMOTE_DIR) && \
-		tar -xzf bot-deploy.tar.gz && \
-		npm install --production && \
+		tar --warning=no-unknown-keyword -xzf bot-deploy.tar.gz && \
+		npm ci --omit=dev && \
 		sudo systemctl restart discordbot"
 	@echo "✅ Deployment Complete!"
 	@rm -f bot-deploy.tar.gz

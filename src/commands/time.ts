@@ -136,7 +136,8 @@ export const handleTimeMentions = async (message: Message) => {
         const data = await awsService.getSingleUser(userId);
         if (data) {
             const time = DateTime.now().setZone(data.timezone);
-            await message.channel.send(`🕒 It is **${time.toFormat("hh:mm a")}** for <@${userId}>.`);
+            const displayName = message.guild?.members.cache.get(userId)?.displayName ?? user.username;
+            await message.channel.send(`🕒 It is **${time.toFormat("hh:mm a")}** for ${displayName}.`);
             lastReplyTimes.set(userId, now);
         }
     }

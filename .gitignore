@@ -1,0 +1,6 @@
+.env
+node_modules/
+dist/
+bot-deploy.tar.gz
+*.pem
+.DS_Store

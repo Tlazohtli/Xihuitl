@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { awsService } from './aws.service';
+import { locationTimezoneService } from './timezone.service';
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY;
 const geocodeUrlBase = `https://maps.googleapis.com/maps/api/geocode/json?key=${GOOGLE_API_KEY}`;
@@ -60,7 +60,7 @@ export const getTimezoneFromLocation = async (
         }
 
         // Check if location is already stored
-        const stored = await awsService.getLocation(sanitizedLocation);
+        const stored = await locationTimezoneService.getLocation(sanitizedLocation);
         if (stored) {
             console.log(`Found stored location: ${sanitizedLocation}`);
             return {
@@ -96,7 +96,7 @@ export const getTimezoneFromLocation = async (
         const timezone = timezoneResponse.data.timeZoneId;
 
         // Store the result for future lookups
-        await awsService.setLocation(sanitizedLocation, timezone, formattedAddress);
+        await locationTimezoneService.setLocation(sanitizedLocation, timezone, formattedAddress);
 
         return {
             timezone,

@@ -1,7 +1,5 @@
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import * as dotenv from 'dotenv';
-import { DateTime } from 'luxon';
-import { awsService } from './services/aws.service';
 import { Command } from './types';
 import { timeCommand, handleTimeMentions } from './commands/time';
 

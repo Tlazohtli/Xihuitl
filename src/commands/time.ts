@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message } from 'discord.js';
 import { DateTime } from 'luxon';
-import { awsService } from '../services/aws.service';
+import { userTimezoneService } from '../services/timezone.service';
 import { getTimezoneFromLocation } from '../services/geo.service';
 import { Command } from '../types';
 
@@ -40,7 +40,7 @@ export const timeCommand: Command = {
                 return;
             }
 
-            await awsService.saveUser(interaction.user.id, result.timezone, result.address);
+            await userTimezoneService.saveUser(interaction.user.id, result.timezone, result.address);
             
             const embed = new EmbedBuilder()
                 .setTitle("📍 Location Updated")
@@ -59,7 +59,7 @@ export const timeCommand: Command = {
             }
 
             if (user) {
-                const data = await awsService.getSingleUser(user.id);
+                const data = await userTimezoneService.getSingleUser(user.id);
                 if (!data) {
                     await interaction.reply({ content: "❌ That user hasn't set their timezone.", ephemeral: true });
                     return;
@@ -93,7 +93,7 @@ export const timeCommand: Command = {
             if (!members) return;
 
             const humanIds = members.filter(m => !m.user.bot).map(m => m.id);
-            const usersData = await awsService.getUsers(humanIds);
+            const usersData = await userTimezoneService.getUsers(humanIds);
 
             if (usersData.length === 0) {
                 await interaction.editReply("No users have set their timezone.");
@@ -132,7 +132,7 @@ export const handleTimeMentions = async (message: Message) => {
         const lastSeen = lastReplyTimes.get(userId);
         if (lastSeen && (now - lastSeen) < COOLDOWN_MS) continue;
 
-        const data = await awsService.getSingleUser(userId);
+        const data = await userTimezoneService.getSingleUser(userId);
         if (data) {
             const time = DateTime.now().setZone(data.timezone);
             const displayName = message.guild?.members.cache.get(userId)?.displayName ?? user.username;

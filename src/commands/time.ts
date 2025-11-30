@@ -100,21 +100,49 @@ export const timeCommand: Command = {
                 return;
             }
 
-            const sorted = usersData.map(u => {
-                const time = DateTime.now().setZone(u.timezone);
-                const member = members.get(u.user_id);
+            // Group users by timezone
+            const timezoneGroups = new Map<string, typeof usersData>();
+            for (const user of usersData) {
+                if (!timezoneGroups.has(user.timezone)) {
+                    timezoneGroups.set(user.timezone, []);
+                }
+                timezoneGroups.get(user.timezone)!.push(user);
+            }
+
+            // Build the formatted output
+            const timezoneEntries = Array.from(timezoneGroups.entries()).map(([timezone, users]) => {
+                const time = DateTime.now().setZone(timezone);
+                const offsetMinutes = time.offset;
+                
+                // Format offset as UTC±HH or UTC±HH:MM (e.g., UTC+05, UTC-08:00)
+                const offsetHours = Math.floor(Math.abs(offsetMinutes) / 60);
+                const offsetMins = Math.abs(offsetMinutes) % 60;
+                const offsetSign = offsetMinutes >= 0 ? '+' : '-';
+                const offsetString = offsetMins === 0
+                    ? `UTC${offsetSign}${offsetHours.toString().padStart(2, '0')}`
+                    : `UTC${offsetSign}${offsetHours.toString().padStart(2, '0')}:${offsetMins.toString().padStart(2, '0')}`;
+                
+                // Use canonical IANA timezone identifier (e.g., "America/New_York")
+                const zoneName = timezone.replace(/_/g, ' ');
+
+                // Format users in this timezone
+                const userList = users.map(u => {
+                    const member = members.get(u.user_id);
+                    return `\u2003${member?.displayName || "Unknown"}`;
+                }).join("\n");
+
                 return {
-                    offset: time.offset,
-                    text: `\`${time.toFormat("hh:mm a LLL dd")}\`\t**${member?.displayName || "Unknown"}**`
+                    offset: offsetMinutes,
+                    text: `\`${time.toFormat("hh:mm a LLL dd")}\` - **${zoneName}**\n${userList}`
                 };
             }).sort((a, b) => a.offset - b.offset);
 
-            const chunk = sorted.map(s => s.text).slice(0, 20); 
+            const description = timezoneEntries.map(e => e.text).join("\n");
 
             const embed = new EmbedBuilder()
                 .setTitle("🌎 Server Timezones")
                 .setColor("Blurple")
-                .setDescription(chunk.join("\n"));
+                .setDescription(description);
             await interaction.editReply({ embeds: [embed] });
         }
     }

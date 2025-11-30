@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction, Message } from 'discord.js';
 import { DateTime } from 'luxon';
 import { awsService } from '../services/aws.service';
-import { getTimezoneFromCity } from '../services/geo.service';
+import { getTimezoneFromLocation } from '../services/geo.service';
 import { Command } from '../types';
 
 const COOLDOWN_MS = 2 * 60 * 60 * 1000;
@@ -14,13 +14,13 @@ export const timeCommand: Command = {
         .addSubcommand(sub => 
             sub.setName('set')
             .setDescription('Set your location')
-            .addStringOption(opt => opt.setName('city').setDescription('City name').setRequired(true))
+            .addStringOption(opt => opt.setName('location').setDescription('Location name').setRequired(true))
         )
         .addSubcommand(sub => 
             sub.setName('get')
-            .setDescription('Get time for a user or city')
+            .setDescription('Get time for a user or location')
             .addUserOption(opt => opt.setName('user').setDescription('Select a user'))
-            .addStringOption(opt => opt.setName('city').setDescription('Type a city'))
+            .addStringOption(opt => opt.setName('location').setDescription('Type a location'))
         )
         .addSubcommand(sub => 
             sub.setName('all')
@@ -32,11 +32,11 @@ export const timeCommand: Command = {
 
         if (sub === 'set') {
             await interaction.deferReply();
-            const city = interaction.options.getString('city', true);
-            const result = await getTimezoneFromCity(city);
+            const location = interaction.options.getString('location', true);
+            const result = await getTimezoneFromLocation(location);
 
             if (!result) {
-                await interaction.editReply("❌ Could not find that location.");
+                await interaction.editReply("❌ Could not find that location. Please try again.");
                 return;
             }
 
@@ -51,10 +51,10 @@ export const timeCommand: Command = {
 
         else if (sub === 'get') {
             const user = interaction.options.getUser('user');
-            const city = interaction.options.getString('city');
+            const location = interaction.options.getString('location');
 
-            if ((user && city) || (!user && !city)) {
-                await interaction.reply({ content: "❌ Please provide EITHER a user OR a city.", ephemeral: true });
+            if ((user && location) || (!user && !location)) {
+                await interaction.reply({ content: "❌ Please provide EITHER a user OR a location.", ephemeral: true });
                 return;
             }
 
@@ -71,11 +71,11 @@ export const timeCommand: Command = {
                     .setDescription(`🕒 **${time.toFormat("hh:mm a")}**\n📍 ${data.display_location}`);
                 await interaction.reply({ embeds: [embed] });
             } 
-            else if (city) {
+            else if (location) {
                 await interaction.deferReply();
-                const result = await getTimezoneFromCity(city);
+                const result = await getTimezoneFromLocation(location);
                 if (!result) {
-                    await interaction.editReply("❌ City not found.");
+                    await interaction.editReply("❌ Location not found. Please try again.");
                     return;
                 }
                 const time = DateTime.now().setZone(result.timezone);

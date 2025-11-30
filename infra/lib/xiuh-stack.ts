@@ -22,7 +22,7 @@ export class XiuhStack extends cdk.Stack {
     // ========================================
     // DynamoDB Table for User Timezones
     // ========================================
-    const userTimezonesTable = new dynamodb.Table(this, 'UserTimezonesTable', {
+    const userTable = new dynamodb.Table(this, 'UserTimezonesTable', {
       tableName: 'xiuh-users',
       partitionKey: {
         name: 'user_id',
@@ -36,14 +36,37 @@ export class XiuhStack extends cdk.Stack {
     });
 
     // ========================================
+    // DynamoDB Table for Locations
+    // ========================================
+    const timezoneTable = new dynamodb.Table(this, 'TimezoneTable', {
+      tableName: 'xiuh-timezone-data',
+      partitionKey: {
+        name: 'location_name',
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // On-demand pricing (free tier friendly)
+      removalPolicy: cdk.RemovalPolicy.RETAIN, // Keep location data permanently
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: false, // Disable to stay within free tier
+      },
+    });
+
+    // ========================================
     // SSM Parameters for Configuration
     // ========================================
     
-    // Store the table name in SSM for runtime lookup
-    new ssm.StringParameter(this, 'TableNameParameter', {
-      parameterName: '/xiuh/table-name',
-      stringValue: userTimezonesTable.tableName,
-      description: 'DynamoDB table name for Xihuitl user timezones',
+    // Store the table names in SSM for runtime lookup
+    new ssm.StringParameter(this, 'UserTableNameParameter', {
+      parameterName: '/xiuh/user-table-name',
+      stringValue: userTable.tableName,
+      description: 'DynamoDB table name for Xihuitl users',
+      tier: ssm.ParameterTier.STANDARD, // Free tier
+    });
+
+    new ssm.StringParameter(this, 'TimezoneTableNameParameter', {
+      parameterName: '/xiuh/timezone-table-name',
+      stringValue: timezoneTable.tableName,
+      description: 'DynamoDB table name for timezone data',
       tier: ssm.ParameterTier.STANDARD, // Free tier
     });
 
@@ -101,7 +124,8 @@ export class XiuhStack extends cdk.Stack {
     });
 
     // Grant DynamoDB permissions
-    userTimezonesTable.grantReadWriteData(botRole);
+    userTable.grantReadWriteData(botRole);
+    timezoneTable.grantReadWriteData(botRole);
 
     // Grant SSM Parameter Store read permissions
     botRole.addToPolicy(
@@ -223,9 +247,15 @@ export class XiuhStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, 'DynamoDBTableName', {
-      value: userTimezonesTable.tableName,
+      value: userTable.tableName,
       description: 'DynamoDB Table Name for user timezones',
       exportName: 'XiuhUserTimezonesTable',
+    });
+
+    new cdk.CfnOutput(this, 'TimezoneTableName', {
+      value: timezoneTable.tableName,
+      description: 'DynamoDB Table Name for timezone data',
+      exportName: 'XiuhTimezoneTable',
     });
 
     new cdk.CfnOutput(this, 'BotRoleArn', {

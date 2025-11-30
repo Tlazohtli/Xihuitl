@@ -71,4 +71,3 @@
     "@aws-cdk/custom-resources:logApiResponseDataPropertyTrueDefault": false
   }
 }
-

@@ -6,19 +6,19 @@ A Discord bot that helps users manage and display timezones across different loc
 
 ```
 Xihuitl/
-├── src/                    # Discord bot application code
-│   ├── commands/          # Bot slash commands
-│   ├── services/          # AWS and geo services
-│   └── index.ts           # Bot entry point
-├── infra/                 # AWS CDK infrastructure code
-│   ├── bin/infra.ts      # CDK app entry
-│   └── lib/xiuh-stack.ts # Stack definition
-├── dist/                  # Compiled JavaScript (gitignored)
+├── src/                  	# Discord bot application code
+│   ├── commands/        	# Bot slash commands
+│   ├── services/        	# AWS and geo services
+│   └── index.ts         	# Bot entry point
+├── infra/               	# AWS CDK infrastructure code
+│   ├── bin/infra.ts     	# CDK app entry
+│   └── lib/xiuh-stack.ts	# Stack definition
+├── dist/                	# Compiled JavaScript (gitignored)
 ├── package.json
-├── tsconfig.json          # TypeScript config for bot
-├── cdk.json              # CDK configuration
-├── Makefile              # Deployment commands
-└── CDK_SETUP.md          # Detailed infrastructure setup guide
+├── tsconfig.json        	# TypeScript config for bot
+├── cdk.json             	# CDK configuration
+├── Makefile             	# Deployment commands
+└── CDK_SETUP.md         	# Detailed infrastructure setup guide
 ```
 
 ## Quick Start
@@ -78,13 +78,13 @@ make deploy.commands
 ## Development
 
 ```bash
+# Build TypeScript
+make build
+
 # Run bot locally (requires AWS credentials)
 npm run dev
 
-# Build TypeScript
-npm run build
-
-# Start compiled bot
+# Start compiled bot (on your local machine)
 npm start
 ```
 
@@ -92,13 +92,13 @@ npm start
 
 ```bash
 # View infrastructure changes
-npm run cdk:diff
+make infra.diff
 
 # Update infrastructure
-npm run cdk:deploy
+make infra.deploy
 
 # Destroy infrastructure (WARNING: deletes EC2)
-npm run cdk:destroy
+make infra.destroy
 ```
 
 ## Monitoring

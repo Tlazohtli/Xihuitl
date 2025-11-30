@@ -49,4 +49,3 @@ See the main `CDK_SETUP.md` in the project root for complete setup instructions.
 ## Note
 
 This is CDK infrastructure code only. The actual Discord bot application code is in the `src/` directory at the project root.
-

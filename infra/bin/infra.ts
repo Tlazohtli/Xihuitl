@@ -15,4 +15,3 @@ new XiuhStack(app, 'XiuhStack', {
 });
 
 app.synth();
-

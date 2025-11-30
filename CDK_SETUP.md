@@ -332,34 +332,34 @@ sudo journalctl -u xiuh-bot --no-pager
 ## Architecture Overview
 
 ```
-┌────────────────────────────────────────┐
-│           AWS us-east-2                │
-│                                        │
-│  ┌────────────────────────────────┐    │
-│  │ EC2 Instance (t3.micro)        │    │
-│  │ - Amazon Linux 2023            │    │
-│  │ - Node.js 18                   │    │
-│  │ - Xihuitl Discord Bot          │    │
-│  │ - systemd service              │    │
-│  └────────┬───────────────────────┘    │
-│           │                            │
-│           │ IAM Role                   │
-│           │                            │
-│  ┌────────▼───────────────────────┐    │
-│  │ DynamoDB Table                 │    │
-│  │ xiuh-users                     │    │
-│  │ - Partition Key: user_id       │    │
-│  │ - On-demand billing            │    │
-│  └────────────────────────────────┘    │
-│                                        │
-│  ┌────────────────────────────────┐    │
-│  │ SSM Parameter Store            │    │
-│  │ - /xiuh/table-name             │    │
-│  │ - /xiuh/discord-token          │    │
-│  │ - /xiuh/ec2-keypair-name       │    │
-│  └────────────────────────────────┘    │
-│                                        │
-└────────────────────────────────────────┘
+┌──────────────────────────────────────┐
+│           AWS us-east-2              │
+│                                      │
+│  ┌────────────────────────────────┐  │
+│  │ EC2 Instance (t3.micro)        │  │
+│  │ - Amazon Linux 2023            │  │
+│  │ - Node.js 18                   │  │
+│  │ - Xihuitl Discord Bot          │  │
+│  │ - systemd service              │  │
+│  └────────┬───────────────────────┘  │
+│           │                          │
+│           │ IAM Role                 │
+│           │                          │
+│  ┌────────▼───────────────────────┐  │
+│  │ DynamoDB Table                 │  │
+│  │ xiuh-users                     │  │
+│  │ - Partition Key: user_id       │  │
+│  │ - On-demand billing            │  │
+│  └────────────────────────────────┘  │
+│                                      │
+│  ┌────────────────────────────────┐  │
+│  │ SSM Parameter Store            │  │
+│  │ - /xiuh/table-name             │  │
+│  │ - /xiuh/discord-token          │  │
+│  │ - /xiuh/ec2-keypair-name       │  │
+│  └────────────────────────────────┘  │
+│                                      │
+└──────────────────────────────────────┘
 ```
 
 ## Quick Reference
